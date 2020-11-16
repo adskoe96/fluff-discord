@@ -1,3 +1,5 @@
+#АВТОРЫ: SandeMC и adskoe96.
+
 import os
 import discord
 import qrcode
@@ -23,7 +25,8 @@ async def on_ready():
 	await bot.wait_until_ready()
 	activity = discord.Game(name="@adskoe96", type=3)
 	await bot.change_presence(status=discord.Status.idle, activity=activity)
-	print("Бот готов!")
+	botname = bot.user
+	print(f"Бот {botname} готов!")
 #
 #HELP MENU
 #
@@ -48,6 +51,14 @@ async def qr(ctx, *args):
 	img.save(nameofqrcode)
 	discordfile=discord.File(fp=nameofqrcode)
 	await ctx.send(file=discordfile)
+#
+#SAY
+#
+@bot.command()
+@commands.has_role("Owner")
+async def say(ctx, channel: discord.TextChannel, *, text):
+	await channel.send(text)
+	await ctx.message.delete()
 #
 #HELLO
 #
