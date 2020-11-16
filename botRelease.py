@@ -24,7 +24,7 @@ logger.addHandler(handler)
 @bot.event
 async def on_ready():
 	await bot.wait_until_ready()
-	activity = discord.Game(name="@adskoe96", type=3)
+	activity = discord.Game(name="/h | @adskoe96", type=3)
 	await bot.change_presence(status=discord.Status.idle, activity=activity)
 	botname = bot.user
 	print(f"Бот {botname} готов!")
@@ -34,7 +34,7 @@ async def on_ready():
 @bot.command()
 async def h(ctx):
 	author = ctx.message.author
-	await ctx.send(embed = discord.Embed(title = 'Help menu.', description = f'{author.mention},\n/h - помощь.\n/hello - приветствие с ботом.\n/start [text] - изменить текст активности бота\n/qr [text] - перевести слова в QR код\n/myInfo - узнать больше о вас информации\ndeveloped by - <@413001095720337409>', color=0x24ff00))
+	await ctx.send(embed = discord.Embed(title = 'Help menu.', description = f'{author.mention},\n/h - помощь.\n/hello - приветствие с ботом.\n/start [text] - изменить текст активности бота\n/qr [text] - перевести слова в QR код\n/myInfo - узнать больше о вас информации\n/getInfo [mention] - узнать информацию о пользователе.\ndeveloped by - <@413001095720337409>', color=0x24ff00))
 #
 #START
 #
