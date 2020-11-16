@@ -1,0 +1,6 @@
+discord
+aiohttp
+websockets
+chardet
+qrcode
+image
