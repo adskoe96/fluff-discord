@@ -33,7 +33,7 @@ async def on_ready():
 @bot.command()
 async def h(ctx):
 	author = ctx.message.author
-	await ctx.send(embed = discord.Embed(title = 'Help menu.', description = f'{author.mention},\n/h - помощь.\n/hello - приветствие с ботом.\n/start [text] - изменить текст активности бота\n/qr [text] - перевести слова в QR код\ndeveloped by - <@413001095720337409>', color=0x24ff00))
+	await ctx.send(embed = discord.Embed(title = 'Help menu.', description = f'{author.mention},\n/h - помощь.\n/hello - приветствие с ботом.\n/start [text] - изменить текст активности бота\n/qr [text] - перевести слова в QR код\n/myInfo - узнать больше о вас информации\ndeveloped by - <@413001095720337409>', color=0x24ff00))
 #
 #START
 #
