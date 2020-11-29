@@ -7,6 +7,7 @@ import logging
 import sys
 import traceback
 import requests
+import random
 from discord.ext import commands
 #
 #VARIABLES
@@ -34,11 +35,12 @@ async def on_ready():
 @bot.command()
 async def h(ctx):
 	author = ctx.message.author
-	await ctx.send(embed = discord.Embed(title = 'Help menu.', description = f'{author.mention},\n/h - помощь.\n/hello - приветствие с ботом.\n/start [text] - изменить текст активности бота\n/qr [text] - перевести слова в QR код\n/myInfo - узнать больше о вас информации\n/getInfo [mention] - узнать информацию о пользователе.\ndeveloped by - <@413001095720337409>', color=0x24ff00))
+	await ctx.send(embed = discord.Embed(title = 'Help menu.', description = f'{author.mention},\n/h - помощь.\n/hello - приветствие с ботом.\n/qr [text] - перевести слова в QR код\n/myInfo - узнать больше о вас информации\n/getInfo [mention] - узнать информацию о пользователе.\n\ndeveloped by - <@413001095720337409>', color=0x24ff00))
 #
 #START
 #
 @bot.command()
+@commands.has_role("Owner" or "Moderator")
 async def start(ctx, *args):
 	howdy = discord.Game(name=" ".join(args[:]), type=3)
 	await bot.change_presence(status=discord.Status.idle, activity=howdy)
@@ -56,7 +58,7 @@ async def qr(ctx, *args):
 #SAY
 #
 @bot.command()
-@commands.has_role("Owner")
+@commands.has_role("Owner" or "Moderator")
 async def say(ctx, channel: discord.TextChannel, *, text):
 	await channel.send(text)
 	await ctx.message.delete()
@@ -81,7 +83,24 @@ async def myInfo(ctx):
 async def getInfo(ctx, member: discord.Member):
 	await ctx.send(embed = discord.Embed(title = f'{member.name}', description= f'Ping: {member.mention}\nAvatar URL: {member.avatar_url}\nUserId: {member.id}', color=0x00a3ff).set_thumbnail(url=member.avatar_url))
 #
-#ERROR
+#CLEAR
+#
+@bot.command()
+@commands.has_role("Owner" or "Moderator")
+async def clear(ctx, amount=None):
+	author = ctx.message.author
+	await ctx.channel.purge(limit=int(amount))
+	await ctx.channel.send(f':white_check_mark: Сообщения успешно удалены пользователем: {author.mention}')
+#
+#adh
+#
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def adh(ctx):
+	author = ctx.message.author
+	await author.send(embed = discord.Embed(title = 'Admin help menu.', description = f'{author.mention},\n/h - помощь.\n/clear [число] - очистка чата от сообщений (очистка зависит от числа).\n/start [текст] - назначить активность бота в свой текст.\n/say [канал] [текст] - сказать что-то от имени бота.\n\ndeveloped by - <@413001095720337409>', color=0x24ff00))
+#
+#ERRORS
 #
 @bot.event
 async def on_command_error(ctx, error):
