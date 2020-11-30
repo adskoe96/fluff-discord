@@ -40,7 +40,7 @@ async def h(ctx):
 #START
 #
 @bot.command()
-@commands.has_role("Owner" or "Moderator")
+@commands.has_permissions(kick_members=True)
 async def start(ctx, *args):
 	howdy = discord.Game(name=" ".join(args[:]), type=3)
 	await bot.change_presence(status=discord.Status.idle, activity=howdy)
@@ -58,7 +58,7 @@ async def qr(ctx, *args):
 #SAY
 #
 @bot.command()
-@commands.has_role("Owner" or "Moderator")
+@commands.has_permissions(kick_members=True)
 async def say(ctx, channel: discord.TextChannel, *, text):
 	await channel.send(text)
 	await ctx.message.delete()
@@ -86,7 +86,7 @@ async def getInfo(ctx, member: discord.Member):
 #CLEAR
 #
 @bot.command()
-@commands.has_role("Owner" or "Moderator")
+@commands.has_permissions(kick_members=True)
 async def clear(ctx, amount=None):
 	author = ctx.message.author
 	await ctx.channel.purge(limit=int(amount))
