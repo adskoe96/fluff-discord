@@ -25,8 +25,8 @@ logger.addHandler(handler)
 @bot.event
 async def on_ready():
 	await bot.wait_until_ready()
-	activity = discord.Game(name="/h | @adskoe96", type=3)
-	await bot.change_presence(status=discord.Status.idle, activity=activity)
+	activity = discord.Activity(name="/h | @adskoe96", type=discord.ActivityType.listening)
+    await bot.change_presence(activity=activity)
 	botname = bot.user
 	print(f"Бот {botname} готов!")
 #
@@ -69,22 +69,6 @@ async def say(ctx, channel: discord.TextChannel, *, text):
 async def hello(ctx):
 	author = ctx.message.author
 	await ctx.send(f'Привет, {author.mention}!')
-#
-#GET ACTIVITY
-#
-@bot.command()
-async def activity(ctx, member: discord.Member):
-	x = member.game.name
-	await ctx.send(f'{member.name} - {x}')
-#
-#MY ACTIVITY
-#
-@bot.command()
-async def myActivity(ctx):
-	x = ctx.message.author
-	y = x.name
-	z = x.game.name
-	await ctx.send(f'{y} - {z}')
 #
 #MYINFO
 #
