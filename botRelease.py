@@ -25,8 +25,7 @@ logger.addHandler(handler)
 @bot.event
 async def on_ready():
 	await bot.wait_until_ready()
-	activity = discord.Activity(name="/h | @adskoe96", type=discord.ActivityType.listening)
-    await bot.change_presence(activity=activity)
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/h | @adskoe96"))
 	botname = bot.user
 	print(f"Бот {botname} готов!")
 #
