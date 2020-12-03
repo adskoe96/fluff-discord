@@ -70,6 +70,22 @@ async def hello(ctx):
 	author = ctx.message.author
 	await ctx.send(f'Привет, {author.mention}!')
 #
+#GET ACTIVITY
+#
+@bot.command()
+async def activity(ctx, member: discord.Member):
+	x = member.game.name
+	await ctx.send(f'{member.name} - {x}')
+#
+#MY ACTIVITY
+#
+@bot.command()
+async def myActivity(ctx):
+	x = ctx.message.author
+	y = x.name
+	z = x.game.name
+	await ctx.send(f'{y} - {z}')
+#
 #MYINFO
 #
 @bot.command()
