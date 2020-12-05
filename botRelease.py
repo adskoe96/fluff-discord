@@ -105,7 +105,7 @@ async def adh(ctx):
 @bot.command()
 async def hit(ctx, member: discord.Member):
 	author = ctx.message.author
-	await ctx.send(embed = discord.Embed(title = f'{author.name}' + ' ' + random.choice(hits) + ' ' + f' {member.name}', color=0x00a3ff).set_thumbnail(url="https://www.yapfiles.ru/files/351061/kotyboksgifkipesochnica104344.gif"))
+	await ctx.send(embed = discord.Embed(title = f'{author.name}' + ' ' + random.choice(hits) + ' ' + f' {member.name}', color=0x00a3ff).set_image(url="https://www.yapfiles.ru/files/351061/kotyboksgifkipesochnica104344.gif"))
 #
 #ERRORS
 #
