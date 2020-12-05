@@ -19,7 +19,15 @@ logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
+#HITS
 hits = ['ударил', 'ударил, но получил сдачи от', 'добил до отключки', 'хотел ударить, но пощадил', 'ударил до смерти и спрятал труп в мусорку', 'опоздал до удара']
+#ERRORS
+errors = ['`...Aus wie ein scheiss Autounfall`', "`Ich brauch 'nen verschissenen Arzt.`", "`Je déteste le cigarette électronique.`", "`Mala palabra.`", "`Faites attention.`", "`Sì, capisco.`", "`Siéntate`", "`Aéme su cabeza.`", "`I'm feeling a bit sick.`", "`Ich brauch nen verschissenen Arzt.`", "`I don't feel too well.`"]
+#COMMAND ERROR
+unknown_command_error = ["Неизвестная команда." + " " + random.choice(errors), "Неизветная команда."]
+#NO PERMISSION
+no_permission_error = ["У вас нет разрешения на использование этой команды." + " " + random.choice(errors), "У вас нет разрешения на использование этой команды."]
+
 #
 #BOT ON READY
 #
@@ -150,7 +158,7 @@ async def on_command_error(ctx, error):
         return
 
     if isinstance(error, commands.UserInputError):
-        await ctx.send("Неизвестная команда.")
+        await ctx.send(random.choice(unknown_command_error))
         await self.send_command_help(ctx)
         return
 
@@ -162,7 +170,7 @@ async def on_command_error(ctx, error):
         return
 
     if isinstance(error, commands.CheckFailure):
-        await ctx.send("У вас нет разрешения на использование этой команды")
+        await ctx.send(random.choice(no_permission_error))
         return
 
     # ignore all other exception types, but print them to stderr
