@@ -159,7 +159,6 @@ async def on_command_error(ctx, error):
 
     if isinstance(error, commands.UserInputError):
         await ctx.send(random.choice(unknown_command_error))
-        await self.send_command_help(ctx)
         return
 
     if isinstance(error, commands.NoPrivateMessage):
