@@ -19,6 +19,7 @@ logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
+hits = ['ударил', 'ударил, но получил сдачи от', 'добил до отключки', 'хотел ударить, но пощадил', 'ударил до смерти и спрятал труп в мусорку', 'опоздал до удара']
 #
 #BOT ON READY
 #
@@ -98,6 +99,13 @@ async def clear(ctx, amount=None):
 async def adh(ctx):
 	author = ctx.message.author
 	await author.send(embed = discord.Embed(title = 'Admin help menu.', description = f'{author.mention},\n/h - помощь.\n/clear [число] - очистка чата от сообщений (очистка зависит от числа).\n/start [текст] - назначить активность бота в свой текст.\n/say [канал] [текст] - сказать что-то от имени бота.\n\ndeveloped by - <@413001095720337409>', color=0x24ff00))
+#
+#HIT
+#
+@bot.command()
+async def hit(ctx, member: discord.Member):
+	author = ctx.message.author
+	await ctx.send(embed = discord.Embed(title = f'{author.name}' + random.choice(hits) + '{member.name}', color=0x00a3ff).set_thumbnail(url="https://www.yapfiles.ru/files/351061/kotyboksgifkipesochnica104344.gif"))
 #
 #ERRORS
 #
