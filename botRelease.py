@@ -8,7 +8,13 @@ import sys
 import traceback
 import requests
 import random
+import urllib
+from discord.ext.commands import Bot
 from discord.ext import commands
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
+from pysstv.grayscale import Robot24BW
 #
 #VARIABLES
 #
@@ -78,6 +84,16 @@ async def hello(ctx):
 	author = ctx.message.author
 	await ctx.send(f'Привет, {author.mention}!')
 #
+#SSTV24BW
+#
+@bot.command()
+async def sstv(ctx, *args):
+	author = ctx.message.author
+	resp = requests.get(args, stream=True)
+	sstv = Robot24BW(img, 44100, 16)
+	sstv.write_wav("sstv.wav")
+	await ctx.send(f'{author.mention}.', file="sstv.wav")
+#
 #MYINFO
 #
 @bot.command()
@@ -88,8 +104,23 @@ async def myInfo(ctx):
 #GETINFO
 #
 @bot.command()
-async def getInfo(ctx, member: discord.Member):
-	await ctx.send(embed = discord.Embed(title = f'{member.name}', description= f'Ping: {member.mention}\nAvatar URL: {member.avatar_url}\nUserId: {member.id}', color=0x00a3ff).set_thumbnail(url=member.avatar_url))
+async def getInfo(ctx, user: discord.Member):
+    img = Image.open("infoimgimg.png") #Replace infoimgimg.png with your background 
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.truetype("Modern_Sans_Light.otf", 100) #Make sure you insert a valid font from your folder.
+    fontbig = ImageFont.truetype("Fitamint Script.ttf", 400) #Make sure you insert a valid font from your folder.
+    #    (x,y)::↓ ↓ ↓ (text)::↓ ↓     (r,g,b)::↓ ↓ ↓
+    draw.text((200, 0), "Information:", (255, 255, 255), font=fontbig) #draws Information
+    draw.text((50, 500), "Username: {}".format(user.name), (255, 255, 255), font=font) #draws the Username of the user
+    draw.text((50, 700), "ID: {}".format(user.id), (255, 255, 255), font=font) #draws the user ID
+    draw.text((50, 900), "User Status: {}".format(user.status), (255, 255, 255), font=font) #draws the user status
+    draw.text((50, 1100), "Account created: {}".format(user.created_at), (255, 255, 255), font=font) #When the account was created 
+    draw.text((50, 1300), "Nickname: {}".format(user.display_name), (255, 255, 255), font=font) # Nickname of the user
+    draw.text((50, 1500), "Users' Top Role: {}".format(user.top_role), (255, 255, 255), font=font) #draws the top rome
+    draw.text((50, 1700), "User Joined: {}".format(user.joined_at), (255, 255, 255), font=font) #draws info about when the user joined
+    img.save('infoimg2.png') #Change infoimg2.png if needed.
+    discordfile=discord.File(fp="infoimg2.png")
+    await ctx.send(file=discordfile)
 #
 #CLEAR
 #
