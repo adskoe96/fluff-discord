@@ -49,7 +49,7 @@ async def on_ready():
 @bot.command()
 async def h(ctx):
 	author = ctx.message.author
-	await ctx.send(embed = discord.Embed(title = 'Help menu.', description = f'{author.mention},\n/h - помощь.\n/hello - приветствие с ботом.\n/qr [text] - перевести слова в QR код\n/myInfo - узнать больше о вас информации\n/getInfo [mention] - узнать информацию о пользователе.\n\ndeveloped by - <@413001095720337409>', color=0x24ff00))
+	await ctx.send(embed = discord.Embed(title = 'Help menu.', description = f'{author.mention},\n/h - помощь.\n/hello - приветствие с ботом.\n/qr [text] - перевести слова в QR код\n/myInfo - узнать больше о вас информации\n/getInfo [mention] - узнать информацию о пользователе.\n/hit [mention] - ударить кого-то.\n\ndeveloped by - <@413001095720337409>', color=0x24ff00))
 #
 #START
 #
@@ -83,16 +83,6 @@ async def say(ctx, channel: discord.TextChannel, *, text):
 async def hello(ctx):
 	author = ctx.message.author
 	await ctx.send(f'Привет, {author.mention}!')
-#
-#SSTV24BW
-#
-@bot.command()
-async def sstv(ctx, *args):
-	author = ctx.message.author
-	resp = requests.get(args, stream=True)
-	sstv = Robot24BW(img, 44100, 16)
-	sstv.write_wav("sstv.wav")
-	await ctx.send(f'{author.mention}.', file="sstv.wav")
 #
 #MYINFO
 #
