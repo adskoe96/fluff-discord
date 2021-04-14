@@ -12,7 +12,6 @@ import time
 import asyncio
 import urllib
 import shutil
-from gtts import gTTS
 from discord.ext import commands, tasks
 from discord.voice_client import VoiceClient
 from random import choice
