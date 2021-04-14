@@ -5,5 +5,4 @@ chardet
 qrcode
 image
 requests
-shutil
 youtube_dl
