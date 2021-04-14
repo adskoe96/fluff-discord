@@ -6,3 +6,4 @@ qrcode
 image
 requests
 youtube_dl
+PyNaCl
