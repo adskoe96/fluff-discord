@@ -5,4 +5,6 @@ chardet
 qrcode
 image
 requests
-pysstv
+urllib
+shutil
+youtube_dl
