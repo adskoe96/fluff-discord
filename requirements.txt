@@ -5,6 +5,5 @@ chardet
 qrcode
 image
 requests
-urllib
 shutil
 youtube_dl
