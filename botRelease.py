@@ -7,40 +7,61 @@ import logging
 import sys
 import traceback
 import requests
-import random
+import youtube_dl
+import time
+import asyncio
 import urllib
-from discord.ext.commands import Bot
-from discord.ext import commands
-from PIL import Image
-from PIL import ImageFont
-from PIL import ImageDraw
-from pysstv.grayscale import Robot24BW
+import shutil
+from gtts import gTTS
+from discord.ext import commands, tasks
+from discord.voice_client import VoiceClient
+from random import choice
 #
 #VARIABLES
 #
 token = os.getenv("TOKEN")
-bot = commands.Bot(command_prefix='/')
+queue = []
+youtube_dl.utils.bug_reports_message = lambda: ''
+ytdl_format_options = {'format': 'bestaudio'}
+FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+status = ['Jamming out to music!', 'Eating!', 'Sleeping!']
+
+class YTDLSource(discord.PCMVolumeTransformer):
+    def __init__(self, source, *, data, volume=0.5):
+        super().__init__(source, volume)
+
+        self.data = data
+
+        self.title = data.get('title')
+        self.url = data.get('url')
+
+    @classmethod
+    async def from_url(cls, url, *, loop=None, stream=False):
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+
+        if 'entries' in data:
+            # take first item from a playlist
+            data = data['entries'][0]
+
+        filename = data['url'] if stream else ytdl.prepare_filename(data)
+        return cls(discord.FFmpegPCMAudio(filename, **FFMPEG_OPTIONS), data=data)
+
+bot = commands.Bot(command_prefix='>')
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
-#HITS
-hits = ['ударил', 'ударил, но получил сдачи от', 'добил до отключки', 'хотел ударить, но пощадил', 'ударил до смерти и спрятал труп в мусорку', 'опоздал до удара']
-#ERRORS
-errors = ['`...Aus wie ein scheiss Autounfall`', "`Ich brauch 'nen verschissenen Arzt.`", "`Je déteste le cigarette électronique.`", "`Mala palabra.`", "`Faites attention.`", "`Sì, capisco.`", "`Siéntate`", "`Aéme su cabeza.`", "`I'm feeling a bit sick.`", "`Ich brauch nen verschissenen Arzt.`", "`I don't feel too well.`"]
-#COMMAND ERROR
-unknown_command_error = ["Неизвестная команда." + " " + random.choice(errors), "Неизветная команда."]
-#NO PERMISSION
-no_permission_error = ["У вас нет разрешения на использование этой команды." + " " + random.choice(errors), "У вас нет разрешения на использование этой команды."]
-
 #
 #BOT ON READY
 #
 @bot.event
 async def on_ready():
 	await bot.wait_until_ready()
-	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='/h | @adskoe96'))
+	activity = discord.Game(name="@adskoe96", type=3)
+	await bot.change_presence(status=discord.Status.idle, activity=activity)
 	botname = bot.user
 	print(f"Бот {botname} готов!")
 #
@@ -49,15 +70,50 @@ async def on_ready():
 @bot.command()
 async def h(ctx):
 	author = ctx.message.author
-	await ctx.send(embed = discord.Embed(title = 'Help menu.', description = f'{author.mention},\n/h - помощь.\n/hello - приветствие с ботом.\n/qr [text] - перевести слова в QR код\n/myInfo - узнать больше о вас информации\n/getInfo [mention] - узнать информацию о пользователе.\n/hit [mention] - ударить кого-то.\n\ndeveloped by - <@413001095720337409>', color=0x24ff00))
+	await ctx.send(embed = discord.Embed(title = f'Help menu right here, {author.name}.', description = f'https://adskoe96.github.io/links/pages/fluffy.html', color=0x24ff00))
 #
 #START
 #
 @bot.command()
 @commands.has_permissions(kick_members=True)
 async def start(ctx, *args):
-	howdy = discord.Game(name=" ".join(args[:]), type=3)
-	await bot.change_presence(status=discord.Status.idle, activity=howdy)
+    author = ctx.message.author.name
+    await ctx.message.delete()
+    if author == "adsk":
+	    howdy = discord.Game(name=" ".join(args[:]), type=3)
+	    await bot.change_presence(status=discord.Status.idle, activity=howdy)
+    else:
+        message = await ctx.channel.send("Nope.")
+        await asyncio.sleep(2)
+        await message.delete()
+#
+#CLEAR
+#
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def clear(ctx, amount=None):
+	author = ctx.message.author
+	await ctx.channel.purge(limit=int(amount))
+	await ctx.channel.send(f':white_check_mark: Сообщения успешно удалены пользователем: {author.mention}')
+#
+#WEBSCRAPING
+#
+@bot.command()
+async def ws(ctx, url):
+    try:
+        author = ctx.message.author
+        page = urllib.request.urlopen(url)
+        f = open("index.html", "wb")
+        shutil.copyfileobj(page, f)
+        f.close()
+        with open("index.html", "rb") as file:
+            await ctx.send(f"{author.mention}, your file here:", file=discord.File(file, "index.html"))
+        await ctx.message.delete()
+    except:
+        await ctx.message.delete()
+        message = await ctx.channel.send('Url error.')
+        await asyncio.sleep(2)
+        await message.delete()
 #
 #QR
 #
@@ -77,12 +133,59 @@ async def say(ctx, channel: discord.TextChannel, *, text):
 	await channel.send(text)
 	await ctx.message.delete()
 #
-#HELLO
+#JOIN
 #
-@bot.command()
-async def hello(ctx):
-	author = ctx.message.author
-	await ctx.send(f'Привет, {author.mention}!')
+@bot.command(pass_context=True)
+async def join(ctx):
+    if not ctx.message.author.voice:
+        await ctx.send("You are not connected to a voice channel")
+        return
+    else:
+        channel = ctx.message.author.voice.channel
+    await channel.connect()
+#
+#PLAY
+#
+@bot.command(name='play', help='This command plays songs')
+async def play(ctx, url):
+    with youtube_dl.YoutubeDL(ytdl_format_options) as ydl:
+        info = ydl.extract_info(url, download=False)
+        URL = info['formats'][0]['url']
+    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    voice.play(discord.FFmpegPCMAudio(URL))
+#
+#LEAVE
+#
+@bot.command(name='leave', help='This command stops makes the bot leave the voice channel')
+async def leave(ctx):
+    voice_client = ctx.message.guild.voice_client
+    await voice_client.disconnect()
+#
+#PAUSE
+#
+@bot.command(pass_context=True)
+async def pause(ctx):
+    server = ctx.message.guild
+    voice_channel = server.voice_client
+    voice_channel.pause()
+#
+#RESUME
+#
+@bot.command(name='resume', help='This command resumes the song!')
+async def resume(ctx):
+    server = ctx.message.guild
+    voice_channel = server.voice_client
+
+    voice_channel.resume()
+#
+#STOP
+#
+@bot.command(name='stop', help='This command stops the song!')
+async def stop(ctx):
+    server = ctx.message.guild
+    voice_channel = server.voice_client
+
+    voice_channel.stop()
 #
 #MYINFO
 #
@@ -94,49 +197,16 @@ async def myInfo(ctx):
 #GETINFO
 #
 @bot.command()
-async def getInfo(ctx, user: discord.Member):
-    img = Image.open("infoimgimg.png") #Replace infoimgimg.png with your background 
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("Modern_Sans_Light.otf", 100) #Make sure you insert a valid font from your folder.
-    fontbig = ImageFont.truetype("Fitamint Script.ttf", 400) #Make sure you insert a valid font from your folder.
-    #    (x,y)::↓ ↓ ↓ (text)::↓ ↓     (r,g,b)::↓ ↓ ↓
-    draw.text((200, 0), "Information:", (255, 255, 255), font=fontbig) #draws Information
-    draw.text((50, 500), "Username: {}".format(user.name), (255, 255, 255), font=font) #draws the Username of the user
-    draw.text((50, 700), "ID: {}".format(user.id), (255, 255, 255), font=font) #draws the user ID
-    draw.text((50, 900), "User Status: {}".format(user.status), (255, 255, 255), font=font) #draws the user status
-    draw.text((50, 1100), "Account created: {}".format(user.created_at), (255, 255, 255), font=font) #When the account was created 
-    draw.text((50, 1300), "Nickname: {}".format(user.display_name), (255, 255, 255), font=font) # Nickname of the user
-    draw.text((50, 1500), "Users' Top Role: {}".format(user.top_role), (255, 255, 255), font=font) #draws the top rome
-    draw.text((50, 1700), "User Joined: {}".format(user.joined_at), (255, 255, 255), font=font) #draws info about when the user joined
-    img.save('infoimg2.png') #Change infoimg2.png if needed.
-    discordfile=discord.File(fp="infoimg2.png")
-    await ctx.send(file=discordfile)
+async def getInfo(ctx, member: discord.Member):
+	await ctx.send(embed = discord.Embed(title = f'{member.name}', description= f'Ping: {member.mention}\nAvatar URL: {member.avatar_url}\nUserId: {member.id}', color=0x00a3ff).set_thumbnail(url=member.avatar_url))
 #
-#CLEAR
+#Looping status
 #
-@bot.command()
-@commands.has_permissions(kick_members=True)
-async def clear(ctx, amount=None):
-	author = ctx.message.author
-	await ctx.channel.purge(limit=int(amount))
-	await ctx.channel.send(f':white_check_mark: Сообщения успешно удалены пользователем: {author.mention}')
+@tasks.loop(seconds=20)
+async def change_status():
+    await bot.change_presence(activity=discord.Game(choice(status)))
 #
-#adh
-#
-@bot.command()
-@commands.has_permissions(kick_members=True)
-async def adh(ctx):
-	author = ctx.message.author
-	await author.send(embed = discord.Embed(title = 'Admin help menu.', description = f'{author.mention},\n/h - помощь.\n/clear [число] - очистка чата от сообщений (очистка зависит от числа).\n/start [текст] - назначить активность бота в свой текст.\n/say [канал] [текст] - сказать что-то от имени бота.\n\ndeveloped by - <@413001095720337409>', color=0x24ff00))
-#
-#HIT
-#
-@bot.command()
-async def hit(ctx, member: discord.Member):
-	author = ctx.message.author
-	await ctx.send(embed = discord.Embed(title = f'{author.name}' + ' ' + random.choice(hits) + ' ' + f' {member.name}', color=0x00a3ff).set_image(url="https://www.yapfiles.ru/files/351061/kotyboksgifkipesochnica104344.gif"))
-#
-#ERRORS
+#ERROR
 #
 @bot.event
 async def on_command_error(ctx, error):
@@ -164,10 +234,6 @@ async def on_command_error(ctx, error):
         await ctx.send('Эта команда была отключена.')
         return
 
-    if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send("Пожалуйста, подождите {} секунд и попробуйте снова.".format(math.ceil(error.retry_after)))
-        return
-
     if isinstance(error, commands.MissingPermissions):
         missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm in error.missing_perms]
         if len(missing) > 2:
@@ -179,7 +245,7 @@ async def on_command_error(ctx, error):
         return
 
     if isinstance(error, commands.UserInputError):
-        await ctx.send(random.choice(unknown_command_error))
+        await ctx.channel.send("Неизвестная команда.")
         return
 
     if isinstance(error, commands.NoPrivateMessage):
@@ -190,7 +256,7 @@ async def on_command_error(ctx, error):
         return
 
     if isinstance(error, commands.CheckFailure):
-        await ctx.send(random.choice(no_permission_error))
+        await ctx.send("У вас нет разрешения на использование этой команды")
         return
 
     # ignore all other exception types, but print them to stderr
