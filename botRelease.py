@@ -1,4 +1,4 @@
-#АВТОРЫ: SandeMC и adskoe96.
+#АВТОР: adskoe96.
 
 import os
 import discord
